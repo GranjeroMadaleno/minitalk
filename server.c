@@ -6,91 +6,73 @@
 /*   By: andefern <andefern@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/10 12:35:18 by andefern          #+#    #+#             */
-/*   Updated: 2024/01/10 16:35:53 by andefern         ###   ########.fr       */
+/*   Updated: 2024/01/16 17:31:18 by andefern         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <unistd.h>
+#include <signal.h>
+#include <stdlib.h>
 
 void	ft_putchar(char c)
 {
 	write(1, &c, 1);
 }
 
-void	ft_putchar_fd(char c, int fd)
-{
-	write(fd, &c, 1);
-}
-
 void	ft_putnbr(int n)
 {
 	if (n > 9)
-	{
 		ft_putnbr(n / 10);
-	}
 	ft_putchar((n % 10) + '0');
 }
 
-int	ft_atoi(const char *str)
+void	handler(int sig, siginfo_t *s_info, void *context)
 {
-	int	i;
-	int	j;
-	int	n;
+	static char	c;
+	static int	i;
+	static int	last_pid;
+	int			bits;
 
-	i = 0;
-	j = 1;
-	n = 0;
-	while (str[i] == '\n' || str[i] == '\f' || str[i] == '\t'
-		|| str[i] == '\r' || str[i] == ' ' || str[i] == '\v')
-		i++;
-	if (str[i] == '-' || str[i] == '+')
+	context = NULL;
+	if (last_pid != 0 && last_pid != s_info->si_pid)
 	{
-		if (str[i] == '-')
-			j *= -1;
-		i++;
+		c = 0;
+		i = 0;
+		write(1, "\n", 1);
 	}
-	while (str[i] >= '0' && str[i] <= '9')
+	i++;
+	bits = sig - 30;
+	c = (c << 1) | bits;
+	if (i == 8)
 	{
-		n = (n * 10) + str[i] - '0';
-		i++;
+		write(1, &c, 1);
+		c = 0;
+		i = 0;
 	}
-	return (n * j);
+	last_pid = s_info->si_pid;
 }
 
-void	server(int sig, siginfo_t *s_info, void *context)
+int	main(void)
 {
-	int				i;
-	int				c;
-	unsigned char	client_pid;
+	struct sigaction	sa;
 
-	i = 0;
-	c = 0;
-	client_pid = 0;
-	(void)context;
-	if (!client_pid)
-		client_pid = s_info->si_pid;
-	c = c | (sig == SIGUSR2);
-	if (++i == 8)
-	{
-		i = 0;
-		if (!c)
-		{
-			kill(client_pid, SIGUSR2);
-			client_pid = 0;
-			return ;
-		}
-		ft_putchar_fd(c, 1);
-		c = 0;
-		kill(client_pid, SIGUSR1);
-	}
+	sa.sa_sigaction = &handler;
+	sa.sa_mask = 0;
+	sa.sa_flags = 0;
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
+	write(1, "Server PID: ", 12);
+	ft_putnbr(getpid());
+	write(1, "\n", 1);
 	while (1)
-	{
-		sleep(1);
-	}
+		pause();
 	return (0);
 }
-int main(argv[1])
+/*int main(argv[1])
 {
 	server(argv[1]);
 	return 0;
 }
+*/
 //server tiene que mostrar su pid, printearmelo
 //y sino que se quede pensndo
