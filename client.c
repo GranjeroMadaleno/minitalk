@@ -6,7 +6,7 @@
 /*   By: andefern <andefern@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/10 12:35:06 by andefern          #+#    #+#             */
-/*   Updated: 2024/01/16 13:25:23 by andefern         ###   ########.fr       */
+/*   Updated: 2024/01/17 15:56:02 by andefern         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ int	ft_atoi(const char *str)
 	return (k);
 }
 
+//message convierte los caracteres en bits y los envía
+//en forma de señal SIGUSR1 o SIGUSR2.
+//usleep hace una pausa de milisegundos para asegurarse
+//de que el server pueda procesar correctamente todo.
+
 void	message(char c, int pid)
 {
 	int	i;
@@ -43,6 +48,11 @@ void	message(char c, int pid)
 		i--;
 	}
 }
+
+//arv[0] Es el nombre del ejecutable "./client".
+//arv[1] Es el PID del proceso al que se envian los mensajes.
+//arv[2] ES la cadena de caracteres (string) que se envia
+//al proceso identificado por el PID.
 
 int	main(int arc, char **arv)
 {
@@ -68,37 +78,3 @@ int	main(int arc, char **arv)
 	}
 	return (0);
 }
-
-/*int	main(int argc, char **argv)
-{
-	if (argc != 3)
-	{
-		printf("%s", "ERROR, THERE ARE NOT 3 ARGUMENT FOUND");
-		return (1);
-	}
-	else
-	{
-		printf("PID: %s\n", argv[1]);
-		printf("STRING: %s\n", argv[2]);
-		client(argv[1], argv[2]);
-	}
-	//recibe PID, String y ejecutble
-	//devolver el string recibido
-	return (0);
-}
-*/
-/*
-    // Registrar el manejador para SIGUSR1
-    if (signal(SIGUSR1, sigusr1_handler) == SIG_ERR) {
-        perror("Error al registrar el manejador para SIGUSR1");
-        return 1;
-    }
-
-    // Registrar el manejador para SIGUSR2
-    if (signal(SIGUSR2, sigusr2_handler) == SIG_ERR) {
-        perror("Error al registrar el manejador para SIGUSR2");
-        return 1;
-    }
-*/
-
-//kill -SIGUSR1 <pid_del_programa>
